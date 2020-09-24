@@ -17,8 +17,8 @@ class PetStoreDetails() : ServiceCall() {
         return mutableListOf(SessionKeys.PET_ID)
     }
 
-    override fun reachableFrom(): List<KClass<out ServiceCall>> {
-        return mutableListOf(PetStoreDetails::class, PetStoreFindByStatusCall::class)
+    override fun nextPossibleCalls(): List<KClass<out ServiceCall>> {
+        return mutableListOf(PetStoreDetails::class, PetStoreFindByStatusCall::class, Done::class)
     }
 
     override fun final() = true

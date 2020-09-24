@@ -7,23 +7,24 @@ import kotlin.reflect.full.primaryConstructor
 
 class RandomRoute : Route {
 
-    private var next = Configuration.getInitialRandomServiceCall().primaryConstructor?.call()
+    private var serviceCall: ServiceCall? = null
 
     override fun isDone(): Boolean {
-        return when (next) {
+        return when (serviceCall) {
             Done() -> true
-            null -> true
             else -> false
         }
     }
 
     override fun next(): ServiceCall {
-        val current = next
-        val possibleNextCalls = RouteMap.nextCallsFor(current?.let { it::class } ?: Done::class)
-        val nextCall =
-            (possibleNextCalls.get(Configuration.random.nextInt(possibleNextCalls.size)).primaryConstructor?.call()
-                ?: Done())
-        next = nextCall
-        return current ?: Done()
+        if (null == serviceCall) serviceCall = Configuration.getInitialRandomServiceCall().primaryConstructor?.call()
+        else {
+            val possibleNextCalls = RouteMap.nextCallsFor(serviceCall?.let { it::class } ?: Done::class)
+            val nextCall =
+                (possibleNextCalls.get(Configuration.random.nextInt(possibleNextCalls.size)).primaryConstructor?.call()
+                    ?: Done())
+            serviceCall = nextCall
+        }
+        return serviceCall ?: Done()
     }
 }

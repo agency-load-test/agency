@@ -15,6 +15,8 @@ import com.onit.routing.Schedule
 import com.onit.statistic.Graphing
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.ForkJoinPool
 
 
 class Agency : CliktCommand() {
@@ -42,6 +44,7 @@ class Agency : CliktCommand() {
     override fun run() {
         val start = LocalDateTime.now()
         println("Starting execution at $start")
+        val executor = ForkJoinPool(numberOfAgents)
         val agents = ArrayList<Agent>()
 
         RouteMap.init()
@@ -55,9 +58,9 @@ class Agency : CliktCommand() {
                 && activeAgents.count() < numberOfAgents
             ) {
                 println("Currently " + activeAgents.count() + " agents are active. Spawning another one.")
-                agents.add(spawnAgent(schedule))
+                agents.add(spawnAgent(schedule, executor))
             } else {
-                println("Currently all " + activeAgents.count() + " agents are active. ")
+                println("Currently " + activeAgents.count() + " agents are active. ")
             }
             Thread.sleep(1000L * Configuration.getSimulationStepDelayInSec())
         }
@@ -66,10 +69,10 @@ class Agency : CliktCommand() {
         throw ProgramResult(if (agents.sumBy { it.errors } > errorThreshold) 1 else 0)
     }
 
-    private fun spawnAgent(schedule: Schedule): Agent {
+    private fun spawnAgent(schedule: Schedule, executorService: ExecutorService): Agent {
         val agent = Agent(schedule.nextRoute())
         agent.session.put(SessionKeys.PET_STATUS, "available")
-        Thread(agent).start()
+        executorService.submit(agent)
         return agent
     }
 }

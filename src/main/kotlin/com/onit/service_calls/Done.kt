@@ -9,7 +9,7 @@ class Done : ServiceCall() {
 
     override fun requiredSessionValues(): List<SessionKeys> = ArrayList()
 
-    override fun reachableFrom(): List<KClass<out ServiceCall>> = ArrayList()
+    override fun nextPossibleCalls(): List<KClass<out ServiceCall>> = ArrayList()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

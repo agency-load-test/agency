@@ -18,6 +18,7 @@ class Agent
 
     override fun run() {
         if (!route.isDone()) callService(route.next())
+        else finished = true
     }
 
     private fun callService(serviceCall: ServiceCall) {
@@ -27,6 +28,7 @@ class Agent
             serviceCall.execute(this)
             successes++
         } catch (e: Exception) {
+            e.printStackTrace()
             errors++
         }
         requestDurationStatistic.add(

@@ -9,25 +9,53 @@ import java.time.format.DateTimeFormatter
 object Graphing {
 
     fun plotGraph(agents: List<Agent>) {
-        val data = calculateXY(agents)
+        val summaryData = calculatSummaryData(agents)
+        val individualData = calculateIndividualEndpointData(agents)
 
-        val plot = Plotly.plot {
-            scatter {
-                x.set(data.first)
-                y.set(data.second)
-                name = "Endpoint Response Times"
-                mode = ScatterMode.markers
+        val plot = Plotly.grid {
+
+            plot(row = 1, width = 12) {
+                scatter {
+                    x.set(summaryData.first)
+                    y.set(summaryData.second)
+                    name = "Endpoint Response Times"
+                    mode = ScatterMode.markers
+                }
+
+                layout {
+                    title = "Endpoint Response Times"
+                    xaxis {
+                        title = "Progress"
+                    }
+                    yaxis {
+                        title = "Response Times"
+                    }
+                }
             }
 
-            layout {
-                title = "Endpoint Response Times"
-                xaxis {
-                    title = "Progress"
-                }
-                yaxis {
-                    title = "Response Times"
+            individualData.entries.filter { !it.key.endsWith(".Done") }
+                    .sortedBy { it.key }
+                    .forEach {
+                plot(row = 1, width = 12) {
+                    scatter {
+                        x.set(it.value.first)
+                        y.set(it.value.second)
+                        name = it.key + " Response Times"
+                        mode = ScatterMode.markers
+                    }
+
+                    layout {
+                        title = it.key + " Response Times"
+                        xaxis {
+                            title = "Progress"
+                        }
+                        yaxis {
+                            title = "Response Times"
+                        }
+                    }
                 }
             }
+
         }
 
         val fileName = Configuration.getOutputFile()
@@ -35,12 +63,36 @@ object Graphing {
         println("Plot created at $fileName")
     }
 
-    private fun calculateXY(agents: List<Agent>): Pair<List<String>, List<Double>> {
+    private fun calculatSummaryData(agents: List<Agent>): Pair<List<String>, List<Double>> {
         val x =
-            agents.map { it.requestDurationStatistic }.flatMap { it.toList() }.sortedBy { it.time }.map { it.time }.map { it.format(
-                DateTimeFormatter.ISO_DATE_TIME) }
-        val y =
-            agents.map { it.requestDurationStatistic }.flatMap { it.toList() }.sortedBy { it.time }.map { it.value }
+            agents.map { it.requestDurationStatistic }
+                    .flatMap { it.toList() }
+                    .sortedBy { it.time }
+                    .map { it.time }
+                    .map {
+                        it.format(
+                            DateTimeFormatter.ISO_DATE_TIME
+                        )
+                    }
+        val y = agents.map { it.requestDurationStatistic }
+                .flatMap { it.toList() }
+                .sortedBy { it.time }
+                .map { it.value }
         return Pair(x, y)
+    }
+
+    private fun calculateIndividualEndpointData(agents: List<Agent>): Map<String, Pair<List<String>, List<Double>>> {
+        val result = LinkedHashMap<String, Pair<MutableList<String>, MutableList<Double>>>()
+        agents.map { it.requestDurationStatistic }
+                .flatMap { it.toList() }
+                .sortedBy { it.time }
+                .map { Pair(it.description, it) }
+                .forEach {
+                    val data = result.getOrPut(it.first) { Pair(mutableListOf(), mutableListOf()) }
+                    data.first.add(it.second.time.format(DateTimeFormatter.ISO_DATE_TIME))
+                    data.second.add(it.second.value)
+                }
+
+        return result
     }
 }
