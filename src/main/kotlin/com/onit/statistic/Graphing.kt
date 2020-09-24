@@ -2,12 +2,14 @@ package com.onit.statistic
 
 import com.onit.agent.Agent
 import com.onit.configuration.Configuration
+import com.onit.service_calls.Done
 import kscience.plotly.*
 import kscience.plotly.models.ScatterMode
 import java.time.format.DateTimeFormatter
 
 object Graphing {
 
+    @OptIn(UnstablePlotlyAPI::class)
     fun plotGraph(agents: List<Agent>) {
         val summaryData = calculatSummaryData(agents)
         val individualData = calculateIndividualEndpointData(agents)
@@ -18,12 +20,12 @@ object Graphing {
                 scatter {
                     x.set(summaryData.first)
                     y.set(summaryData.second)
-                    name = "Endpoint Response Times"
+                    name = "All Endpoints Response Times"
                     mode = ScatterMode.markers
                 }
 
                 layout {
-                    title = "Endpoint Response Times"
+                    title = "All Endpoints Response Times"
                     xaxis {
                         title = "Progress"
                     }
@@ -33,28 +35,27 @@ object Graphing {
                 }
             }
 
-            individualData.entries.filter { !it.key.endsWith(".Done") }
-                    .sortedBy { it.key }
+            individualData.entries.sortedBy { it.key }
                     .forEach {
-                plot(row = 1, width = 12) {
-                    scatter {
-                        x.set(it.value.first)
-                        y.set(it.value.second)
-                        name = it.key + " Response Times"
-                        mode = ScatterMode.markers
-                    }
+                        plot(row = 1, width = 12) {
+                            scatter {
+                                x.set(it.value.first)
+                                y.set(it.value.second)
+                                name = it.key + " Response Times"
+                                mode = ScatterMode.markers
+                            }
 
-                    layout {
-                        title = it.key + " Response Times"
-                        xaxis {
-                            title = "Progress"
-                        }
-                        yaxis {
-                            title = "Response Times"
+                            layout {
+                                title = it.key + " Response Times"
+                                xaxis {
+                                    title = "Progress"
+                                }
+                                yaxis {
+                                    title = "Response Times"
+                                }
+                            }
                         }
                     }
-                }
-            }
 
         }
 
@@ -85,6 +86,8 @@ object Graphing {
         val result = LinkedHashMap<String, Pair<MutableList<String>, MutableList<Double>>>()
         agents.map { it.requestDurationStatistic }
                 .flatMap { it.toList() }
+                // We don't want a graph for the final stop, no queries are sent here
+                .filter { !it.description.equals(Done.description) }
                 .sortedBy { it.time }
                 .map { Pair(it.description, it) }
                 .forEach {

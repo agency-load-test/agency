@@ -21,5 +21,5 @@ class PetStoreDetails() : ServiceCall() {
         return mutableListOf(PetStoreDetails::class, PetStoreFindByStatusCall::class, Done::class)
     }
 
-    override fun final() = true
+    override fun description() = "GET /pet/{petId}"
 }

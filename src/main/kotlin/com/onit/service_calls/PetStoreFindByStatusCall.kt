@@ -27,4 +27,6 @@ class PetStoreFindByStatusCall() : ServiceCall() {
     override fun nextPossibleCalls(): List<KClass<out ServiceCall>> {
         return mutableListOf(PetStoreDetails::class, PetStoreFindByStatusCall::class)
     }
+
+    override fun description() = "GET /pet/findByStatus?status={status}"
 }

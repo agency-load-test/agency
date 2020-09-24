@@ -5,6 +5,11 @@ import com.onit.agent.SessionKeys
 import kotlin.reflect.KClass
 
 class Done : ServiceCall() {
+
+    companion object {
+        val description = "Done"
+    }
+
     override fun execute(agent: Agent) = println("Agent is done.")
 
     override fun requiredSessionValues(): List<SessionKeys> = ArrayList()
@@ -21,5 +26,5 @@ class Done : ServiceCall() {
         return javaClass.hashCode()
     }
 
-
+    override fun description() = description
 }

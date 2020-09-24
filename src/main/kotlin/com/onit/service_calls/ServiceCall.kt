@@ -12,6 +12,5 @@ abstract class ServiceCall {
     abstract fun execute(agent: Agent)
     abstract fun requiredSessionValues(): List<SessionKeys>
     abstract fun nextPossibleCalls(): List<KClass<out ServiceCall>>
-    open fun description() = this::class.toString()
-    open fun final() = false
+    open fun description() = this::class.simpleName!!
 }
