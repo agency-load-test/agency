@@ -14,14 +14,19 @@ class Schedule private constructor(private val assignments: Array<KClass<out Rou
         fun init() = Schedule(arrayOf(RandomRoute::class))
 
         fun init(file: String) = Schedule(Files.readAllLines(File(file).toPath())
-            .map { Class.forName(it.trim()) }
-            .map{ it.kotlin}
-            .map {
-                @Suppress("UNCHECKED_CAST")
-                it as KClass<out Route>
-            }
-            .toTypedArray())
+                                                  .map { Class.forName(it.trim()) }
+                                                  .map { it.kotlin }
+                                                  .map {
+                                                      @Suppress("UNCHECKED_CAST")
+                                                      it as KClass<out Route>
+                                                  }
+                                                  .toTypedArray())
     }
 
-    fun nextRoute() = assignments[next % assignments.size].primaryConstructor?.call()
+    fun nextRoute(): Route {
+        val scheduledRoute = assignments[next % assignments.size].primaryConstructor?.call()
+        if (null == scheduledRoute)
+            println("Could not instantiate scheduled route " + assignments[next % assignments.size].simpleName + ", assigning RandomRoute instead");
+        return scheduledRoute ?: RandomRoute()
+    }
 }
