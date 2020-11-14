@@ -1,11 +1,13 @@
 package com.onit.routing
 
 import com.onit.configuration.Configuration
+import com.onit.routing.annotation.Route
 import com.onit.service_calls.Done
 import com.onit.service_calls.ServiceCall
 import kotlin.reflect.full.primaryConstructor
 
-class RandomRoute : Route {
+@Route(name="Random")
+class RandomRoute : com.onit.routing.Route {
 
     private var serviceCall: ServiceCall? = null
 

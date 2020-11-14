@@ -1,3 +1,6 @@
-com.onit.routing.MyScriptedRoute
-com.onit.routing.RandomRoute
-com.onit.routing.MyScriptedRoute
+MyScripted
+  PET_STATUS=available
+Random
+  PET_STATUS=available
+MyScripted
+  PET_STATUS=available

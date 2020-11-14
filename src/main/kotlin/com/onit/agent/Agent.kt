@@ -1,15 +1,23 @@
 package com.onit.agent
 
 import com.onit.configuration.Configuration
+import com.onit.routing.AgentInstructions
 import com.onit.routing.Route
 import com.onit.service_calls.ServiceCall
 import com.onit.statistic.DataPoint
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-class Agent
-    (val route: Route) : Runnable {
-    val session = Session()
+class Agent(instructions: AgentInstructions) : Runnable {
+    val session: Session
+    val route: Route
+
+    init {
+        session = Session()
+        route = Route.instantiate(instructions.route)
+        instructions.seedParameters.forEach { session.put(SessionKeys.valueOf(it.key), it.value) }
+    }
+
     var finished = false
     var successes = 0
     var errors = 0

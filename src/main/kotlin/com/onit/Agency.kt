@@ -70,8 +70,7 @@ class Agency : CliktCommand() {
     }
 
     private fun spawnAgent(schedule: Schedule, executorService: ExecutorService): Agent {
-        val agent = Agent(schedule.nextRoute())
-        agent.session.put(SessionKeys.PET_STATUS, "available")
+        val agent = Agent(schedule.nextInstructions())
         executorService.submit(agent)
         return agent
     }
