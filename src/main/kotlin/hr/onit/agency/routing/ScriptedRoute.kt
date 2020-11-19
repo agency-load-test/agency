@@ -1,8 +1,8 @@
-package hr.onit.routing
+package hr.onit.agency.routing
 
-import hr.onit.configuration.Configuration
-import hr.onit.service_calls.Done
-import hr.onit.service_calls.ServiceCall
+import hr.onit.agency.configuration.Configuration
+import hr.onit.agency.service_calls.Done
+import hr.onit.agency.service_calls.ServiceCall
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 

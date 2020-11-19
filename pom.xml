@@ -12,7 +12,6 @@
     <name>The Agency</name>
 
     <properties>
-        <openapi.definition.file>src/main/resources/openapi.yaml</openapi.definition.file>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>8</java.version>
         <kotlin.version>1.4.10</kotlin.version>
@@ -59,33 +58,6 @@
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
         <plugins>
-            <plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>4.3.1</version>
-                <executions>
-                    <execution>
-                        <id>kotlin</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <!-- specify the swagger yaml -->
-                            <inputSpec>${openapi.definition.file}</inputSpec>
-                            <generatorName>kotlin</generatorName>
-                            <configOptions>
-                                <serializableModel>true</serializableModel>
-                            </configOptions>
-
-                            <output>${project.build.directory}/generated-sources/kotlin</output>
-                            <apiPackage>hr.onit.agency.client.api</apiPackage>
-                            <modelPackage>hr.onit.agency.client.model</modelPackage>
-                            <invokerPackage>hr.onit.agency.client</invokerPackage>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

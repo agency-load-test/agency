@@ -1,5 +1,6 @@
-package hr.onit.routing
+package hr.onit.agency.routing
 
+import hr.onit.agency.logging.LoggingWrapper
 import okhttp3.internal.immutableListOf
 import org.reflections.Reflections
 import java.io.File
@@ -17,8 +18,8 @@ class Schedule private constructor(private val assignments: List<AgentInstructio
 
         fun init(file: String): Schedule {
             @Suppress("UNCHECKED_CAST")
-            val routesByName = Reflections("hr.onit").getTypesAnnotatedWith(hr.onit.routing.annotation.Route::class.java)
-                    .associateBy({ it.getAnnotation(hr.onit.routing.annotation.Route::class.java).name }, { it::class as KClass<out Route> })
+            val routesByName = Reflections("hr.onit").getTypesAnnotatedWith(hr.onit.agency.routing.annotation.Route::class.java)
+                    .associateBy({ it.getAnnotation(hr.onit.agency.routing.annotation.Route::class.java).name }, { it::class as KClass<out Route> })
 
             val scheduleConfiguration = Files.readAllLines(File(file).toPath()).iterator()
             val instructions = mutableListOf<AgentInstructions>()
@@ -27,9 +28,10 @@ class Schedule private constructor(private val assignments: List<AgentInstructio
             var route: KClass<out Route> = RandomRoute::class
             while (scheduleConfiguration.hasNext()) {
                 val line = scheduleConfiguration.next()
+                LoggingWrapper.trace("Schedule", "Evaluating schedule line '"+line+"'")
                 if (line.startsWith(' ') || line.startsWith('\t')) {
                     seedParameters.put(
-                        line.substring(line.indexOf('=')).trim(),
+                        line.substring(0, line.indexOf('=')).trim(),
                         line.substring(line.indexOf('=') + 1, line.length)
                     )
                 } else {
@@ -39,6 +41,7 @@ class Schedule private constructor(private val assignments: List<AgentInstructio
                 }
 
             }
+            LoggingWrapper.trace("Schedule", "Final instruction set is "+instructions)
             return Schedule(instructions)
         }
 

@@ -1,10 +1,11 @@
-package hr.onit.agent
+package hr.onit.agency.agent
 
-import hr.onit.configuration.Configuration
-import hr.onit.routing.AgentInstructions
-import hr.onit.routing.Route
-import hr.onit.service_calls.ServiceCall
-import hr.onit.statistic.DataPoint
+import hr.onit.agency.configuration.Configuration
+import hr.onit.agency.logging.LoggingWrapper
+import hr.onit.agency.routing.AgentInstructions
+import hr.onit.agency.routing.Route
+import hr.onit.agency.service_calls.ServiceCall
+import hr.onit.agency.statistic.DataPoint
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -15,7 +16,7 @@ class Agent(instructions: AgentInstructions) : Runnable {
     init {
         session = Session()
         route = Route.instantiate(instructions.route)
-        instructions.seedParameters.forEach { session.put(SessionKeys.valueOf(it.key), it.value) }
+        instructions.seedParameters.forEach { session.put(it.key, it.value) }
     }
 
     var finished = false
@@ -30,7 +31,7 @@ class Agent(instructions: AgentInstructions) : Runnable {
     }
 
     private fun callService(serviceCall: ServiceCall) {
-        println("Calling " + serviceCall.description())
+        LoggingWrapper.debug("Service Call", "Calling " + serviceCall.description())
         val start = LocalDateTime.now()
         try {
             serviceCall.execute(this)

@@ -1,7 +1,7 @@
-package hr.onit.configuration
+package hr.onit.agency.configuration
 
 import com.natpryce.konfig.*
-import hr.onit.service_calls.ServiceCall
+import hr.onit.agency.service_calls.ServiceCall
 import java.io.File
 import java.nio.file.Path
 import kotlin.random.Random

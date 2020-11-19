@@ -1,4 +1,4 @@
-package hr.onit.routing.annotation
+package hr.onit.agency.routing.annotation
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)

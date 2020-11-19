@@ -1,7 +1,7 @@
-package hr.onit.routing
+package hr.onit.agency.routing
 
-import hr.onit.service_calls.Done
-import hr.onit.service_calls.ServiceCall
+import hr.onit.agency.service_calls.Done
+import hr.onit.agency.service_calls.ServiceCall
 import kotlin.reflect.KClass
 
  class RouteBuilder internal constructor(val route: List<Any>) {

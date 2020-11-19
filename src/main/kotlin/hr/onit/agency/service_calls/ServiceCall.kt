@@ -1,8 +1,7 @@
-package hr.onit.service_calls
+package hr.onit.agency.service_calls
 
-import hr.onit.agent.Agent
-import hr.onit.agent.SessionKeys
-import hr.onit.configuration.Configuration
+import hr.onit.agency.agent.Agent
+import hr.onit.agency.configuration.Configuration
 import kotlin.reflect.KClass
 
 abstract class ServiceCall {
@@ -10,7 +9,7 @@ abstract class ServiceCall {
         return Configuration.getBaseUrl()
     }
     abstract fun execute(agent: Agent)
-    abstract fun requiredSessionValues(): List<SessionKeys>
+    abstract fun requiredSessionValues(): List<String>
     abstract fun nextPossibleCalls(): List<KClass<out ServiceCall>>
     open fun description() = this::class.simpleName!!
 }

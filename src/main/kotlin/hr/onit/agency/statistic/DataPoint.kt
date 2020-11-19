@@ -1,4 +1,4 @@
-package hr.onit.statistic
+package hr.onit.agency.statistic
 
 import java.time.LocalDateTime
 

@@ -1,13 +1,13 @@
-package hr.onit.routing
+package hr.onit.agency.routing
 
-import hr.onit.configuration.Configuration
-import hr.onit.routing.annotation.Route
-import hr.onit.service_calls.Done
-import hr.onit.service_calls.ServiceCall
+import hr.onit.agency.configuration.Configuration
+import hr.onit.agency.routing.annotation.Route
+import hr.onit.agency.service_calls.Done
+import hr.onit.agency.service_calls.ServiceCall
 import kotlin.reflect.full.primaryConstructor
 
 @Route(name="Random")
-class RandomRoute : hr.onit.routing.Route {
+class RandomRoute : hr.onit.agency.routing.Route {
 
     private var serviceCall: ServiceCall? = null
 

@@ -1,8 +1,9 @@
-package hr.onit.statistic
+package hr.onit.agency.statistic
 
-import hr.onit.agent.Agent
-import hr.onit.configuration.Configuration
-import hr.onit.service_calls.Done
+import hr.onit.agency.agent.Agent
+import hr.onit.agency.configuration.Configuration
+import hr.onit.agency.logging.LoggingWrapper
+import hr.onit.agency.service_calls.Done
 import kscience.plotly.*
 import kscience.plotly.models.ScatterMode
 import java.time.format.DateTimeFormatter
@@ -61,7 +62,7 @@ object Graphing {
 
         val fileName = Configuration.getOutputFile()
         plot.makeFile(fileName)
-        println("Plot created at $fileName")
+        LoggingWrapper.info("Graphing", "Plot created at $fileName")
     }
 
     private fun calculatSummaryData(agents: List<Agent>): Pair<List<String>, List<Double>> {

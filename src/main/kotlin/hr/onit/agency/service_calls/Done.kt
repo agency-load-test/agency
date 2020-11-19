@@ -1,7 +1,7 @@
-package hr.onit.service_calls
+package hr.onit.agency.service_calls
 
-import hr.onit.agent.Agent
-import hr.onit.agent.SessionKeys
+import hr.onit.agency.agent.Agent
+import hr.onit.agency.logging.LoggingWrapper
 import kotlin.reflect.KClass
 
 class Done : ServiceCall() {
@@ -10,9 +10,9 @@ class Done : ServiceCall() {
         val description = "Done"
     }
 
-    override fun execute(agent: Agent) = println("Agent is done.")
+    override fun execute(agent: Agent) = LoggingWrapper.debug("Agent Info", "Agent is done.")
 
-    override fun requiredSessionValues(): List<SessionKeys> = ArrayList()
+    override fun requiredSessionValues(): List<String> = ArrayList()
 
     override fun nextPossibleCalls(): List<KClass<out ServiceCall>> = ArrayList()
 
