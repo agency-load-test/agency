@@ -15,8 +15,12 @@ class Agent(instructions: AgentInstructions) : Runnable {
 
     init {
         session = Session()
+        LoggingWrapper.trace("Agent", "Using route " + instructions.route.simpleName)
         route = Route.instantiate(instructions.route)
-        instructions.seedParameters.forEach { session.put(it.key, it.value) }
+        instructions.seedParameters.forEach {
+            LoggingWrapper.trace("Agent", "Seeding parameter " + it.key + " with value '"+it.value+"'")
+            session.put(it.key, it.value)
+        }
     }
 
     var finished = false
@@ -31,7 +35,7 @@ class Agent(instructions: AgentInstructions) : Runnable {
     }
 
     private fun callService(serviceCall: ServiceCall) {
-        LoggingWrapper.debug("Service Call", "Calling " + serviceCall.description())
+        LoggingWrapper.debug("Agent", "Calling " + serviceCall.description())
         val start = LocalDateTime.now()
         try {
             serviceCall.execute(this)

@@ -6,7 +6,6 @@ import org.reflections.Reflections
 import java.io.File
 import java.nio.file.Files
 import kotlin.reflect.KClass
-import kotlin.reflect.full.primaryConstructor
 
 
 class Schedule private constructor(private val assignments: List<AgentInstructions>) {
@@ -19,7 +18,7 @@ class Schedule private constructor(private val assignments: List<AgentInstructio
         fun init(file: String): Schedule {
             @Suppress("UNCHECKED_CAST")
             val routesByName = Reflections("hr.onit").getTypesAnnotatedWith(hr.onit.agency.routing.annotation.Route::class.java)
-                    .associateBy({ it.getAnnotation(hr.onit.agency.routing.annotation.Route::class.java).name }, { it::class as KClass<out Route> })
+                    .associateBy({ it.getAnnotation(hr.onit.agency.routing.annotation.Route::class.java).name }, { it.kotlin as KClass<out Route> })
 
             val scheduleConfiguration = Files.readAllLines(File(file).toPath()).iterator()
             val instructions = mutableListOf<AgentInstructions>()
@@ -35,9 +34,9 @@ class Schedule private constructor(private val assignments: List<AgentInstructio
                         line.substring(line.indexOf('=') + 1, line.length)
                     )
                 } else {
-                    instructions.add(AgentInstructions(route, seedParameters))
                     seedParameters= mutableMapOf()
                     route = routesByName.get(line.trim())?:RandomRoute::class
+                    instructions.add(AgentInstructions(route, seedParameters))
                 }
 
             }
@@ -47,5 +46,5 @@ class Schedule private constructor(private val assignments: List<AgentInstructio
 
     }
 
-    fun nextInstructions() = assignments[next % assignments.size]
+    fun nextInstructions() = assignments[next++ % assignments.size]
 }

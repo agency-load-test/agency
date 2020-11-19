@@ -3,7 +3,8 @@ package hr.onit.agency.logging
 object LoggingWrapper {
     enum class LogLevel { TRACE, DEBUG, INFO, WARN, ERROR }
 
-    val indentation = 40
+    val titleIndentation = 30
+    val levelIndentation = 10
 
     fun trace(title: String, message: String) {
         if (LogLevel.TRACE >= getLogLevel())
@@ -17,12 +18,12 @@ object LoggingWrapper {
 
     fun info(title: String, message: String) {
         if (LogLevel.INFO >= getLogLevel())
-        log("info ", title, message)
+        log("info", title, message)
     }
 
     fun warn(title: String, message: String) {
         if (LogLevel.WARN >= getLogLevel())
-        log("warn ", title, message)
+        log("warn", title, message)
     }
 
     fun error(title: String, message: String) {
@@ -31,7 +32,7 @@ object LoggingWrapper {
     }
 
     private fun log(prefix: String, title: String, message: String) {
-        println(prefix + " " + title + indent(indentation - title.length) + message)
+        println(prefix + indent(levelIndentation-prefix.length) + title + indent(titleIndentation - title.length) + message)
     }
 
     fun getLogLevel() = LogLevel.TRACE
