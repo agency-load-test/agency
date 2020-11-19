@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>agency</artifactId>
-    <groupId>com.onit</groupId>
+    <groupId>com.github.agency-load-test</groupId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>The com.onit.Agency</name>
+    <name>The Agency</name>
 
     <properties>
         <openapi.definition.file>src/main/resources/openapi.yaml</openapi.definition.file>
@@ -79,9 +79,9 @@
                             </configOptions>
 
                             <output>${project.build.directory}/generated-sources/kotlin</output>
-                            <apiPackage>com.onit.agency.client.api</apiPackage>
-                            <modelPackage>org.loadtest.client.model</modelPackage>
-                            <invokerPackage>org.loadtest.client</invokerPackage>
+                            <apiPackage>hr.onit.agency.client.api</apiPackage>
+                            <modelPackage>hr.onit.agency.client.model</modelPackage>
+                            <invokerPackage>hr.onit.agency.client</invokerPackage>
                         </configuration>
                     </execution>
                 </executions>
