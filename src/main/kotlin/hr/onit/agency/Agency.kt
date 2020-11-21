@@ -1,6 +1,5 @@
 package hr.onit.agency
 
-import hr.onit.agency.agent.Agent
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.parameters.options.default
@@ -8,11 +7,15 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.long
+import hr.onit.agency.agent.Agent
 import hr.onit.agency.configuration.Configuration
 import hr.onit.agency.logging.LoggingWrapper
 import hr.onit.agency.routing.RouteMap
 import hr.onit.agency.routing.Schedule
 import hr.onit.agency.statistic.Graphing
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ExecutorService
@@ -41,7 +44,7 @@ class Agency : CliktCommand() {
 
     val errorThreshold = Configuration.getErrorThreshold()
 
-    override fun run() {
+    override fun run() = runBlocking {
         logInputs()
         val start = LocalDateTime.now()
         LoggingWrapper.debug("Agency", "Starting execution at $start")
@@ -58,12 +61,15 @@ class Agency : CliktCommand() {
             if (LocalDateTime.now().minus(duration, ChronoUnit.SECONDS).isBefore(start)
                 && activeAgents.count() < numberOfAgents
             ) {
-                LoggingWrapper.info("Agent Management", "Currently " + activeAgents.count() + " agents are active. Spawning another one.")
+                LoggingWrapper.info(
+                    "Agent Management",
+                    "Currently " + activeAgents.count() + " agents are active. Spawning another one."
+                )
                 agents.add(spawnAgent(schedule, executor))
             } else {
                 LoggingWrapper.debug("Agent Management", "Currently " + activeAgents.count() + " agents are active. ")
             }
-            Thread.sleep(1000L * Configuration.getSimulationStepDelayInSec())
+            delay(1000L * Configuration.getSimulationStepDelayInSec())
         }
         LoggingWrapper.info("Agency", "Completed execution at " + LocalDateTime.now())
         if (plotGraph) Graphing.plotGraph(agents)
@@ -72,14 +78,21 @@ class Agency : CliktCommand() {
 
     private fun spawnAgent(schedule: Schedule, executorService: ExecutorService): Agent {
         val agent = Agent(schedule.nextInstructions())
-        executorService.submit(agent)
+        launchAgent(agent)
         return agent
     }
 
+    private fun launchAgent(agent: Agent) = runBlocking {
+        launch {
+            agent.run()
+        }
+    }
+
+
     private fun logInputs() {
-        LoggingWrapper.trace("Input", "Number of agents: "+numberOfAgents)
-        LoggingWrapper.trace("Input", "Duration: "+duration)
-        LoggingWrapper.trace("Input", "Plot graph: "+plotGraph)
-        LoggingWrapper.trace("Input", "Schedule file: "+scheduleFile)
+        LoggingWrapper.trace("Input", "Number of agents: " + numberOfAgents)
+        LoggingWrapper.trace("Input", "Duration: " + duration)
+        LoggingWrapper.trace("Input", "Plot graph: " + plotGraph)
+        LoggingWrapper.trace("Input", "Schedule file: " + scheduleFile)
     }
 }
