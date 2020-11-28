@@ -2,6 +2,7 @@ package hr.onit.agency.configuration
 
 import com.natpryce.konfig.*
 import hr.onit.agency.service_calls.ServiceCall
+import okhttp3.internal.immutableListOf
 import java.io.File
 import java.nio.file.Path
 import kotlin.random.Random
@@ -10,7 +11,9 @@ import kotlin.reflect.full.isSubclassOf
 
 object Configuration {
 
-    val config = ConfigurationProperties.fromResource("config.properties")
+    val builtInServiceCallsPackage = "hr.onit.agency.service_calls"
+    val config = ConfigurationProperties.fromResource("agency.properties") overriding
+            ConfigurationProperties.fromResource("defaults.properties")
     val random = Random(0)
 
     fun getBaseUrl(): String {
@@ -34,7 +37,9 @@ object Configuration {
     }
 
     fun getServiceCallPackages(): List<String> {
-        return get(Key("service.call.packages", stringType)).split(";")
+        val packages = mutableListOf(builtInServiceCallsPackage)
+        packages.addAll(get(Key("service.call.packages", stringType)).split(";"))
+        return packages
     }
 
     fun getInitialRandomServiceCall(): KClass<out ServiceCall> {
@@ -45,11 +50,11 @@ object Configuration {
         else throw Misconfiguration("Configured initial service call class is not of type ServiceCall")
     }
 
-    private fun <T> get(configurationKey: Key<T>): T {
+    fun <T> get(configurationKey: Key<T>): T {
         return config.get(configurationKey)
     }
 
-    private fun <T> getOrDefault(configurationKey: Key<T>, defaultValue: T): T {
+    fun <T> getOrDefault(configurationKey: Key<T>, defaultValue: T): T {
         return config.getOrElse(configurationKey, defaultValue)
     }
 }

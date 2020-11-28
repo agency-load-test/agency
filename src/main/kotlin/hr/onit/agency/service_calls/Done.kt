@@ -10,7 +10,7 @@ class Done : ServiceCall() {
         val description = "Done"
     }
 
-    override fun execute(agent: Agent) = LoggingWrapper.debug("Agent Info", "Agent is done.")
+    override fun doExecute(agent: Agent) = LoggingWrapper.debug("Agent Info", "Agent is done.")
 
     override fun requiredSessionValues(): List<String> = ArrayList()
 

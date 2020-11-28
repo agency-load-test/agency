@@ -35,7 +35,7 @@ object LoggingWrapper {
         println(prefix + indent(levelIndentation-prefix.length) + title + indent(titleIndentation - title.length) + message)
     }
 
-    fun getLogLevel() = LogLevel.TRACE
+    fun getLogLevel() = LogLevel.INFO
 
     fun indent(width: Int): String {
         val builder = StringBuilder()
