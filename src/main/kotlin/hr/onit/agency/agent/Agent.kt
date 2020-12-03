@@ -8,16 +8,19 @@ import hr.onit.agency.service_calls.ServiceCall
 import hr.onit.agency.statistic.DataPoint
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.*
+import kotlin.collections.ArrayList
 
 class Agent(instructions: AgentInstructions) : Runnable {
+
+    enum class Hook { PRE_RUN, POST_RUN, PRE_SERVICE_CALL, POST_SERVICE_CALL }
+
     val session: Session
     val route: Route
 
     // Hooks
-    val preRun = mutableListOf<(Agent) -> Unit>()
-    val postRun = mutableListOf<(Agent) -> Unit>()
-    val preServiceCall = mutableListOf<(Agent, ServiceCall) -> Unit>()
-    val postServiceCall = mutableListOf<(Agent, ServiceCall) -> Unit>()
+    private val agentHooks = mutableMapOf<Hook, MutableMap<String, (Agent) -> Unit>>()
+    private val agentServiceCallHooks = mutableMapOf<Hook, MutableMap<String, (Agent, ServiceCall) -> Unit>>()
 
     var finished = false
     var successes = 0
@@ -36,40 +39,36 @@ class Agent(instructions: AgentInstructions) : Runnable {
     }
 
     override fun run() {
-        handleHooks(preRun)
+        handleHooks(Hook.PRE_RUN)
         if (!route.isDone()) callService(route.next())
         else finished = true
-        handleHooks(postRun)
+        handleHooks(Hook.POST_RUN)
     }
 
-    fun registerPreRunHook(hook:(Agent) -> Unit) = preRun.add(hook)
+    fun registerHook(type: Hook, hookId: String? = null, hook: (Agent) -> Unit) = agentHooks.getOrPut(type) { mutableMapOf() }.put(hookId ?: UUID.randomUUID().toString(), hook)
 
-    fun unregisterPreRunHook(hook:(Agent) -> Unit) = preRun.remove(hook)
+    fun registerHook(type: Hook, hookId: String? = null, hook: (Agent, ServiceCall) -> Unit) =
+        agentServiceCallHooks.getOrPut(type) { mutableMapOf() }.put(hookId ?: UUID.randomUUID().toString(), hook)
 
-    fun registerPostRunHook(hook:(Agent) -> Unit) = postRun.add(hook)
-
-    fun unregisterPostRunHook(hook:(Agent) -> Unit) = postRun.remove(hook)
-
-    fun registerPreServiceCallHook(hook:(Agent, ServiceCall) -> Unit) = preServiceCall.add(hook)
-
-    fun unregisterPreServiceCallHook(hook:(Agent, ServiceCall) -> Unit) = preServiceCall.remove(hook)
-
-    fun registerPostServiceCallHook(hook:(Agent, ServiceCall) -> Unit) = postServiceCall.add(hook)
-
-    fun unregisterPostServiceCallHook(hook:(Agent, ServiceCall) -> Unit) = postServiceCall.remove(hook)
+    fun unregisterHook(type: Hook, hookId: String) {
+        when (type) {
+            Hook.PRE_RUN, Hook.POST_RUN -> agentHooks.getOrDefault(type, mutableMapOf()).remove(hookId)
+            Hook.PRE_SERVICE_CALL, Hook.POST_SERVICE_CALL -> agentServiceCallHooks.getOrDefault(type, mutableMapOf()).remove(hookId)
+        }
+    }
 
     private fun callService(serviceCall: ServiceCall) {
         LoggingWrapper.debug("Agent", "Calling " + serviceCall.description())
         val start = LocalDateTime.now()
         try {
-            handleHooks(preServiceCall, serviceCall)
+            handleHooks(Hook.PRE_SERVICE_CALL, serviceCall)
             serviceCall.execute(this)
             successes++
         } catch (e: Exception) {
             e.printStackTrace()
             errors++
         } finally {
-            handleHooks(postServiceCall, serviceCall)
+            handleHooks(Hook.POST_SERVICE_CALL, serviceCall)
         }
         requestDurationStatistic.add(
             DataPoint(
@@ -87,11 +86,18 @@ class Agent(instructions: AgentInstructions) : Runnable {
         }
     }
 
-    private fun handleHooks(hooks: MutableList<(Agent) -> Unit>) {
-        hooks.forEach { it.invoke(this) }
+    private fun handleHooks(type: Hook, serviceCall: ServiceCall? = null) {
+        when (type) {
+            Hook.PRE_RUN, Hook.POST_RUN -> handleHooks(agentHooks.getOrDefault(type, emptyMap()))
+            Hook.PRE_SERVICE_CALL, Hook.POST_SERVICE_CALL -> handleHooks(agentServiceCallHooks.getOrDefault(type, emptyMap()), serviceCall)
+        }
     }
 
-    private fun handleHooks(hooks: MutableList<(Agent, ServiceCall) -> Unit>, serviceCall: ServiceCall) {
-        hooks.forEach { it.invoke(this, serviceCall) }
+    private fun handleHooks(hooks: Map<String, (Agent) -> Unit>) {
+        hooks.values.forEach { it.invoke(this) }
+    }
+
+    private fun handleHooks(hooks: Map<String, (Agent, ServiceCall) -> Unit>, serviceCall: ServiceCall?) {
+        serviceCall?.let { call -> hooks.values.forEach { it.invoke(this, call) } }
     }
 }

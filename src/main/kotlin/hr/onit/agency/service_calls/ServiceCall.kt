@@ -2,34 +2,35 @@ package hr.onit.agency.service_calls
 
 import hr.onit.agency.agent.Agent
 import hr.onit.agency.configuration.Configuration
+import java.util.*
 import kotlin.reflect.KClass
 
 abstract class ServiceCall {
 
-    val preExecute = mutableListOf<(ServiceCall, Agent) -> Unit>()
-    val postExecute = mutableListOf<(ServiceCall, Agent) -> Unit>()
+    enum class Hook { PRE_EXECUTE, POST_EXECUTE }
+
+    private val hooks = mutableMapOf<Hook, MutableMap<String, (ServiceCall, Agent) -> Unit>>()
 
     fun basePath():String {
         return Configuration.getBaseUrl()
     }
 
     fun execute(agent: Agent) {
-        handleHooks(preExecute, agent)
+        handleHooks(Hook.PRE_EXECUTE, agent)
         doExecute(agent)
-        handleHooks(postExecute, agent)
+        handleHooks(Hook.POST_EXECUTE, agent)
     }
 
-    fun registerPreExecuteHook(hook:(ServiceCall, Agent) -> Unit) = preExecute.add(hook)
-    fun unregisterPreExecuteHook(hook:(ServiceCall, Agent) -> Unit) = preExecute.remove(hook)
-    fun registerPostExecuteHook(hook:(ServiceCall, Agent) -> Unit) = postExecute.add(hook)
-    fun unregisterPostExecuteHook(hook:(ServiceCall, Agent) -> Unit) = postExecute.remove(hook)
+    fun registerHook(type: Hook, hookId: String? = null,  hook: (ServiceCall, Agent) -> Unit) = hooks.getOrPut(type) { mutableMapOf() }.put(hookId?:UUID.randomUUID().toString(), hook)
+
+    fun unregisterPreExecuteHook(type: Hook, hookId: String) = hooks.getOrDefault(type, mutableMapOf()).remove(hookId)
 
     abstract fun doExecute(agent: Agent)
     abstract fun requiredSessionValues(): List<String>
     abstract fun nextPossibleCalls(): List<KClass<out ServiceCall>>
     open fun description() = this::class.simpleName!!
 
-    private fun handleHooks(hooks: MutableList<(ServiceCall, Agent) -> Unit>, agent: Agent) {
-        hooks.forEach { it.invoke(this, agent) }
+    private fun handleHooks(type:Hook, agent: Agent) {
+        hooks.getOrDefault(type, emptyMap()).values.forEach { it.invoke(this, agent) }
     }
 }
